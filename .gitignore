@@ -1,0 +1,10 @@
+*.o
+wapp
+*.a
+*.so
+tags
+.tags.vim
+.cache/
+compile_commands.json
+xdg-shell-client-protocol.h
+xdg-shell-protocol.c
