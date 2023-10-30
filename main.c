@@ -7,10 +7,10 @@ static bool running = true;
 static struct Window w;
 static struct Keyboard k;
 
-uint32 red[4] = { 0xFFFF0000, 0xFFCC0000, 0xFF770000, 0xFF440000 };
-uint32 green[4] = { 0xFF00FF00, 0xFF00CC00, 0xFF007700, 0xFF004400 };
-uint32 blue[4] = { 0xFF0000FF, 0xFF0000CC, 0xFF000077, 0xFF000044 };
-uint32 gray[4] = { 0xFF000000, 0xFFCCCCCC, 0xFF777777, 0xFF444444 };
+uint32 red[4] = { 0xFF0000, 0xCC0000, 0x770000, 0x440000 };
+uint32 green[4] = { 0x00FF00, 0x00CC00, 0x007700, 0x004400 };
+uint32 blue[4] = { 0x0000FF, 0x0000CC, 0x000077, 0x000044 };
+uint32 gray[4] = { 0x000000, 0xCCCCCC, 0x777777, 0x444444 };
 uint32 *palletes[4] = {
     red,
     green,
@@ -140,18 +140,19 @@ wl_pointer_leave(
 
 static void
 set_window_colors(uint32 *buffer, int x, int y) {
+    uint32 alpha = w.alpha << 6*4;
     for (int j = 0; j < w.height; j += 1) {
         for (int i = 0; i < w.width; i += 1) {
             if (i < x) {
                 if (j < y)
-                    buffer[j*w.width + i] = w.pallete[0];
+                    buffer[j*w.width + i] = alpha | w.pallete[0];
                 else
-                    buffer[j*w.width + i] = w.pallete[1];
+                    buffer[j*w.width + i] = alpha | w.pallete[1];
             } else {
                 if (j < y)
-                    buffer[j*w.width + i] = w.pallete[2];
+                    buffer[j*w.width + i] = alpha | w.pallete[2];
                 else
-                    buffer[j*w.width + i] = w.pallete[3];
+                    buffer[j*w.width + i] = alpha | w.pallete[3];
             }
         }
     }
@@ -442,6 +443,14 @@ wl_keyboard_key(
         case XKB_KEY_r:
             memcpy(w.pallete, palletes[rand() % LENGTH(palletes)], sizeof (red));
             break;
+        case XKB_KEY_k:
+            if (w.alpha >= 0x0F)
+                w.alpha -= 0x0F;
+            break;
+        case XKB_KEY_l:
+            if (w.alpha <= 0xF0)
+                w.alpha += 0x0F;
+            break;
         }
         set_window_colors(w.draw_buffer, w.x, w.y);
     }
@@ -693,6 +702,7 @@ int main(int argc, char *argv[]) {
     }
 
     create_buffer();
+    w.alpha = 0xCC;
 
     w.surface = wl_compositor_create_surface(w.compositor);
     w.xdg_surface = xdg_wm_base_get_xdg_surface(w.xdg_wm_base, w.surface);

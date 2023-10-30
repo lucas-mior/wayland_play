@@ -81,6 +81,7 @@ struct Window {
     int dirty;
 
     uint32 pallete[4];
+    uint32 alpha;
     void *draw_buffer;
     int x;
     int y;
