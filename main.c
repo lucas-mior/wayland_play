@@ -557,7 +557,7 @@ xdg_wm_base_listener = {
 };
 
 static void
-registry_global(
+wl_registry_global(
     void *data,
     struct wl_registry *registry,
     uint32_t name,
@@ -584,7 +584,7 @@ registry_global(
 }
 
 static void
-registry_global_remove(
+wl_registry_global_remove(
     void *data,
     struct wl_registry *registry,
     uint32_t name
@@ -598,8 +598,8 @@ registry_global_remove(
 
 static struct wl_registry_listener
 wl_registry_listener = {
-    .global = registry_global,
-    .global_remove = registry_global_remove,
+    .global = wl_registry_global,
+    .global_remove = wl_registry_global_remove,
 };
 
 void resize_window(int width, int height) {

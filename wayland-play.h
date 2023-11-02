@@ -77,7 +77,6 @@ struct Window {
     int height;
     int size;
     int alloc_size;
-    int unused;
     int dirty;
 
     uint32 pallete[4];
