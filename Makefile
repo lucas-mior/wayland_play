@@ -8,16 +8,14 @@ PKG_CONFIG ?= pkg-config
 
 clang: CC=clang
 clang: CFLAGS += -Weverything -Wno-unsafe-buffer-usage
-clang: clean
-clang: wayland-play
+clang: clean wayland-play
 
 release: CFLAGS += -O2 -flto
 release: wayland-play
 
 debug: CFLAGS += -g
 debug: CFLAGS += -Dwayland-play_DEBUG -fsanitize=undefined
-debug: clean
-debug: wayland-play
+debug: clean wayland-play
 
 CFLAGS += -std=c99 -D_DEFAULT_SOURCE
 CFLAGS += -Wall -Wextra
