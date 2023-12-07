@@ -441,7 +441,8 @@ wl_keyboard_key(
             memcpy(w.pallete, gray, sizeof (red));
             break;
         case XKB_KEY_r:
-            memcpy(w.pallete, palletes[rand() % LENGTH(palletes)], sizeof (red));
+            memcpy(w.pallete, palletes[rand() % LENGTH(palletes)],
+			       sizeof (red));
             break;
         case XKB_KEY_k:
             if (w.alpha >= 0x0F)
@@ -577,7 +578,8 @@ wl_registry_global(
         w.compositor = wl_registry_bind(registry, name,
             &wl_compositor_interface, 1);
     } else if (strcmp(interface, xdg_wm_base_interface.name) == 0) {
-        w.xdg_wm_base = wl_registry_bind(registry, name, &xdg_wm_base_interface, 1);
+        w.xdg_wm_base = wl_registry_bind(registry, name,
+										 &xdg_wm_base_interface, 1);
     }
 
     return;
@@ -697,7 +699,8 @@ int main(int argc, char *argv[]) {
     wl_display_roundtrip(w.display);
 
     if (w.shm == NULL || w.compositor == NULL || w.xdg_wm_base == NULL) {
-        fprintf(stderr, "Error: no wl_shm, wl_compositor, or xdg_wm_base support.\n");
+        fprintf(stderr, "Error: missing"
+				        " wl_shm, wl_compositor, or xdg_wm_base support.\n");
         exit(EXIT_FAILURE);
     }
 
