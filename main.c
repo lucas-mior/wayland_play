@@ -687,7 +687,7 @@ int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
     memset(&w, 0, sizeof (*(&w)));
-    memset(w.pallete, 0xFF, sizeof (w.pallete));
+    memcpy(w.pallete, red, sizeof (red));
 
     if ((w.display = wl_display_connect(NULL)) == NULL) {
         fprintf(stderr, "Error conecting to display.\n");
@@ -739,6 +739,10 @@ int main(int argc, char *argv[]) {
     wl_surface_destroy(w.surface);
     wl_buffer_destroy(w.buffer);
 
-    printf("========== wayland-play: normal exit ====================");
+    {
+        char *message = "\n========== wayland-play: normal exit ====================\n";
+        write(STDERR_FILENO, message, strlen(message));
+        write(STDOUT_FILENO, message, strlen(message));
+    }
     return 0;
 }
