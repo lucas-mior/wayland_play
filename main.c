@@ -614,7 +614,7 @@ void resize_window(int width, int height) {
     w.width = MIN(w.width, WIDTH_MAX);
     w.height = MIN(w.height, HEIGHT_MAX);
 
-    stride = w.width * 4;
+    stride = w.width*4;
     if (w.buffer)
         wl_buffer_destroy(w.buffer);
     w.buffer = wl_shm_pool_create_buffer(w.shm_pool, 0,
@@ -628,7 +628,7 @@ static void create_buffer(void) {
     int fd;
 	int retries = 100;
 
-    w.alloc_size = 4 * WIDTH_MAX * HEIGHT_MAX;
+    w.alloc_size = 4*WIDTH_MAX*HEIGHT_MAX;
 
 	do {
         char name[] = "/hello-wayland-XXXXXX";

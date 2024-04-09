@@ -29,8 +29,8 @@
 #define HEIGHT 512
 #define WIDTH_MIN 128
 #define HEIGHT_MIN 128
-#define WIDTH_MAX 1600
-#define HEIGHT_MAX 900
+#define WIDTH_MAX 1920
+#define HEIGHT_MAX 1080
 
 #ifndef INTEGERS
 #define INTEGERS
