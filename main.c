@@ -234,6 +234,8 @@ wl_pointer_button(
             xdg_toplevel_configure(NULL, w.xdg_toplevel, WIDTH, HEIGHT, NULL);
             set_window_colors(w.draw_buffer, w.x, w.y);
             break;
+        default:
+            break;
         }
     }
 
@@ -468,6 +470,8 @@ wl_keyboard_key(
         case XKB_KEY_l:
             if (w.alpha <= 0xF0)
                 w.alpha += 0x0F;
+            break;
+        default:
             break;
         }
         set_window_colors(w.draw_buffer, w.x, w.y);
