@@ -36,11 +36,9 @@ uint32 *palletes[4] = {
 };
 
 static void
-xdg_surface_configure(
-    void *data,
-    struct xdg_surface *xdg_surface,
-    uint32_t serial
-) {
+xdg_surface_configure(void *data,
+                      struct xdg_surface *xdg_surface,
+                      uint32_t serial) {
     (void) data;
 
     if (w.dirty) {
@@ -58,10 +56,8 @@ xdg_surface_listener = {
 };
 
 static void
-xdg_toplevel_close(
-    void *data,
-    struct xdg_toplevel *toplevel
-) {
+xdg_toplevel_close(void *data,
+                   struct xdg_toplevel *toplevel) {
     (void) data;
     (void) toplevel;
 
@@ -70,13 +66,11 @@ xdg_toplevel_close(
 }
 
 static void
-xdg_toplevel_configure(
-    void *data,
-    struct xdg_toplevel *xdg_toplevel,
-    int32_t width,
-    int32_t height,
-    struct wl_array *states
-) {
+xdg_toplevel_configure(void *data,
+                       struct xdg_toplevel *xdg_toplevel,
+                       int32_t width,
+                       int32_t height,
+                       struct wl_array *states) {
     (void) data;
     (void) xdg_toplevel;
     (void) states;
@@ -86,12 +80,10 @@ xdg_toplevel_configure(
 }
 
 static void
-xdg_toplevel_configure_bounds(
-    void *data,
-    struct xdg_toplevel *xdg_toplevel,
-    int32_t width,
-    int32_t height
-) {
+xdg_toplevel_configure_bounds(void *data,
+                              struct xdg_toplevel *xdg_toplevel,
+                              int32_t width,
+                              int32_t height) {
     (void) data;
     (void) xdg_toplevel;
     (void) width;
@@ -101,11 +93,9 @@ xdg_toplevel_configure_bounds(
 }
 
 static void
-xdg_toplevel_wm_capabilities(
-    void *data,
-    struct xdg_toplevel *xdg_toplevel,
-    struct wl_array *capabilities
-) {
+xdg_toplevel_wm_capabilities(void *data,
+                             struct xdg_toplevel *xdg_toplevel,
+                             struct wl_array *capabilities) {
     (void) data;
     (void) xdg_toplevel;
     (void) capabilities;
@@ -122,14 +112,12 @@ xdg_toplevel_listener = {
 };
 
 static void
-wl_pointer_enter(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t serial,
-    struct wl_surface *surface,
-    wl_fixed_t surface_x,
-    wl_fixed_t surface_y
-) {
+wl_pointer_enter(void *data,
+                 struct wl_pointer *wl_pointer,
+                 uint32_t serial,
+                 struct wl_surface *surface,
+                 wl_fixed_t surface_x,
+                 wl_fixed_t surface_y) {
     (void) data;
     (void) wl_pointer;
     (void) serial;
@@ -141,12 +129,10 @@ wl_pointer_enter(
 }
 
 static void
-wl_pointer_leave(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t serial,
-    struct wl_surface *surface
-) {
+wl_pointer_leave(void *data,
+                 struct wl_pointer *wl_pointer,
+                 uint32_t serial,
+                 struct wl_surface *surface) {
     (void) data;
     (void) wl_pointer;
     (void) serial;
@@ -181,13 +167,11 @@ set_window_colors(uint32 *buffer, int x, int y) {
 }
 
 static void
-wl_pointer_motion(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t time,
-    wl_fixed_t surface_x,
-    wl_fixed_t surface_y
-) {
+wl_pointer_motion(void *data,
+                  struct wl_pointer *wl_pointer,
+                  uint32_t time,
+                  wl_fixed_t surface_x,
+                  wl_fixed_t surface_y) {
     (void) data;
     (void) wl_pointer;
     (void) time;
@@ -200,14 +184,12 @@ wl_pointer_motion(
 }
 
 static void
-wl_pointer_button(
-    void *data,
-    struct wl_pointer *pointer,
-    uint32_t serial,
-    uint32_t time,
-    uint32_t button,
-    uint32_t state
-) {
+wl_pointer_button(void *data,
+                  struct wl_pointer *pointer,
+                  uint32_t serial,
+                  uint32_t time,
+                  uint32_t button,
+                  uint32_t state) {
     struct wl_seat *seat = data;
     (void) pointer;
     (void) time;
@@ -243,13 +225,11 @@ wl_pointer_button(
 }
 
 static void
-wl_pointer_axis(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t time,
-    uint32_t axis,
-    wl_fixed_t value
-) {
+wl_pointer_axis(void *data,
+                struct wl_pointer *wl_pointer,
+                uint32_t time,
+                uint32_t axis,
+                wl_fixed_t value) {
     (void) data;
     (void) wl_pointer;
     (void) time;
@@ -260,10 +240,8 @@ wl_pointer_axis(
 }
 
 static void
-wl_pointer_frame(
-    void *data,
-    struct wl_pointer *wl_pointer
-) {
+wl_pointer_frame(void *data,
+                 struct wl_pointer *wl_pointer) {
     (void) data;
     (void) wl_pointer;
 
@@ -271,11 +249,9 @@ wl_pointer_frame(
 }
 
 static void
-wl_pointer_axis_source(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t axis_source
-) {
+wl_pointer_axis_source(void *data,
+                       struct wl_pointer *wl_pointer,
+                       uint32_t axis_source) {
     (void) data;
     (void) wl_pointer;
     (void) axis_source;
@@ -284,12 +260,10 @@ wl_pointer_axis_source(
 }
 
 static void
-wl_pointer_axis_stop(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t time,
-    uint32_t axis
-) {
+wl_pointer_axis_stop(void *data,
+                     struct wl_pointer *wl_pointer,
+                     uint32_t time,
+                     uint32_t axis) {
     (void) data;
     (void) wl_pointer;
     (void) time;
@@ -299,12 +273,10 @@ wl_pointer_axis_stop(
 }
 
 static void
-wl_pointer_axis_discrete(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t axis,
-    int32_t discrete
-) {
+wl_pointer_axis_discrete(void *data,
+                         struct wl_pointer *wl_pointer,
+                         uint32_t axis,
+                         int32_t discrete) {
     (void) data;
     (void) wl_pointer;
     (void) axis;
@@ -314,12 +286,10 @@ wl_pointer_axis_discrete(
 }
 
 static void
-wl_pointer_axis_value120(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t axis,
-    int32_t value120
-) {
+wl_pointer_axis_value120(void *data,
+                         struct wl_pointer *wl_pointer,
+                         uint32_t axis,
+                         int32_t value120) {
     (void) data;
     (void) wl_pointer;
     (void) axis;
@@ -329,12 +299,10 @@ wl_pointer_axis_value120(
 }
 
 static void
-wl_pointer_axis_relative_direction(
-    void *data,
-    struct wl_pointer *wl_pointer,
-    uint32_t axis,
-    uint32_t direction
-) {
+wl_pointer_axis_relative_direction(void *data,
+                                   struct wl_pointer *wl_pointer,
+                                   uint32_t axis,
+                                   uint32_t direction) {
     (void) data;
     (void) wl_pointer;
     (void) axis;
@@ -359,13 +327,11 @@ wl_pointer_listener = {
 };
 
 static void
-wl_keyboard_keymap(
-    void *data,
-    struct wl_keyboard *wl_keyboard,
-    uint32_t format,
-    int32_t fd,
-    uint32_t size
-) {
+wl_keyboard_keymap(void *data,
+                   struct wl_keyboard *wl_keyboard,
+                   uint32_t format,
+                   int32_t fd,
+                   uint32_t size) {
     char *keymap_name;
     (void) data;
     (void) wl_keyboard;
@@ -390,13 +356,11 @@ wl_keyboard_keymap(
 }
 
 static void
-wl_keyboard_enter(
-    void *data,
-    struct wl_keyboard *wl_keyboard,
-    uint32_t serial,
-    struct wl_surface *surface,
-    struct wl_array *keys
-) {
+wl_keyboard_enter(void *data,
+                  struct wl_keyboard *wl_keyboard,
+                  uint32_t serial,
+                  struct wl_surface *surface,
+                  struct wl_array *keys) {
     (void) data;
     (void) wl_keyboard;
     (void) serial;
@@ -407,12 +371,10 @@ wl_keyboard_enter(
 }
 
 static void
-wl_keyboard_leave(
-    void *data,
-    struct wl_keyboard *wl_keyboard,
-    uint32_t serial,
-    struct wl_surface *surface
-) {
+wl_keyboard_leave(void *data,
+                  struct wl_keyboard *wl_keyboard,
+                  uint32_t serial,
+                  struct wl_surface *surface) {
     (void) data;
     (void) wl_keyboard;
     (void) serial;
@@ -422,14 +384,12 @@ wl_keyboard_leave(
 }
 
 static void
-wl_keyboard_key(
-    void *data,
-    struct wl_keyboard *wl_keyboard,
-    uint32_t serial,
-    uint32_t time,
-    uint32_t key,
-    uint32_t state
-) {
+wl_keyboard_key(void *data,
+                struct wl_keyboard *wl_keyboard,
+                uint32_t serial,
+                uint32_t time,
+                uint32_t key,
+                uint32_t state) {
     xkb_keycode_t keycode;
     xkb_keysym_t keysym;
     xkb_keysym_t utf32;
@@ -481,15 +441,13 @@ wl_keyboard_key(
 }
 
 static void
-wl_keyboard_modifiers(
-    void *data,
-    struct wl_keyboard *wl_keyboard,
-    uint32_t serial,
-    uint32_t mods_depressed,
-    uint32_t mods_latched,
-    uint32_t mods_locked,
-    uint32_t group
-) {
+wl_keyboard_modifiers(void *data,
+                      struct wl_keyboard *wl_keyboard,
+                      uint32_t serial,
+                      uint32_t mods_depressed,
+                      uint32_t mods_latched,
+                      uint32_t mods_locked,
+                      uint32_t group) {
     (void) data;
     (void) wl_keyboard;
     (void) serial;
@@ -502,12 +460,10 @@ wl_keyboard_modifiers(
 }
 
 static void
-wl_keyboard_repeat_info(
-    void *data,
-    struct wl_keyboard *wl_keyboard,
-    int32_t rate,
-    int32_t delay
-) {
+wl_keyboard_repeat_info(void *data,
+                        struct wl_keyboard *wl_keyboard,
+                        int32_t rate,
+                        int32_t delay) {
     (void) data;
     (void) wl_keyboard;
     (void) rate;
@@ -527,11 +483,9 @@ wl_keyboard_listener = {
 };
 
 static void
-seat_capabilities(
-    void *data,
-    struct wl_seat *seat,
-    uint32_t capabilities
-) {
+seat_capabilities(void *data,
+                  struct wl_seat *seat,
+                  uint32_t capabilities) {
     (void) data;
 
     if (capabilities & WL_SEAT_CAPABILITY_POINTER) {
@@ -545,11 +499,9 @@ seat_capabilities(
 }
 
 static void
-seat_name(
-    void *data,
-    struct wl_seat *wl_seat,
-    const char *name
-) {
+seat_name(void *data,
+          struct wl_seat *wl_seat,
+          const char *name) {
     (void) data;
     (void) wl_seat;
     (void) name;
@@ -565,8 +517,8 @@ seat_listener = {
 
 static void
 xdg_wm_base_listener_ping(void *data,
-                      struct xdg_wm_base *wm_base,
-                      uint32_t serial) {
+                          struct xdg_wm_base *wm_base,
+                          uint32_t serial) {
     (void) data;
 
     xdg_wm_base_pong(wm_base, serial);
@@ -579,13 +531,11 @@ xdg_wm_base_listener = {
 };
 
 static void
-wl_registry_global(
-    void *data,
-    struct wl_registry *registry,
-    uint32_t name,
-    const char *interface,
-    uint32_t version
-) {
+wl_registry_global(void *data,
+                   struct wl_registry *registry,
+                   uint32_t name,
+                   const char *interface,
+                   uint32_t version) {
     (void) data;
     (void) version;
 
@@ -607,11 +557,9 @@ wl_registry_global(
 }
 
 static void
-wl_registry_global_remove(
-    void *data,
-    struct wl_registry *registry,
-    uint32_t name
-) {
+wl_registry_global_remove(void *data,
+                          struct wl_registry *registry,
+                          uint32_t name) {
     (void) data;
     (void) registry;
     (void) name;
