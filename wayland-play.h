@@ -40,7 +40,7 @@
 
 #define MIN(a,b) (a) < (b) ? (a) : (b)
 #define MAX(a,b) (a) > (b) ? (a) : (b)
-#define LENGTH(X) (int) (sizeof (X) / sizeof (*X))
+#define LENGTH(X) (int) (sizeof(X) / sizeof(*X))
 
 #define WIDTH 512
 #define HEIGHT 512

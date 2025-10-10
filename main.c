@@ -408,20 +408,19 @@ wl_keyboard_key(void *data,
             running = false;
             break;
         case XKB_KEY_u:
-            memcpy(w.pallete, red, sizeof (red));
+            memcpy(w.pallete, red, sizeof(red));
             break;
         case XKB_KEY_i:
-            memcpy(w.pallete, green, sizeof (red));
+            memcpy(w.pallete, green, sizeof(red));
             break;
         case XKB_KEY_o:
-            memcpy(w.pallete, blue, sizeof (red));
+            memcpy(w.pallete, blue, sizeof(red));
             break;
         case XKB_KEY_p:
-            memcpy(w.pallete, gray, sizeof (red));
+            memcpy(w.pallete, gray, sizeof(red));
             break;
         case XKB_KEY_r:
-            memcpy(w.pallete, palletes[rand() % LENGTH(palletes)],
-			       sizeof (red));
+            memcpy(w.pallete, palletes[rand() % LENGTH(palletes)], sizeof(red));
             break;
         case XKB_KEY_k:
             if (w.alpha >= 0x0F)
@@ -655,8 +654,8 @@ static void create_buffer(void) {
 int main(int argc, char *argv[]) {
     (void) argc;
     (void) argv;
-    memset(&w, 0, sizeof (*(&w)));
-    memcpy(w.pallete, red, sizeof (red));
+    memset(&w, 0, sizeof(*(&w)));
+    memcpy(w.pallete, red, sizeof(red));
 
     if ((w.display = wl_display_connect(NULL)) == NULL) {
         fprintf(stderr, "Error conecting to display.\n");
