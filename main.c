@@ -658,7 +658,7 @@ int main(int argc, char *argv[]) {
     memcpy(w.pallete, red, sizeof(red));
 
     if ((w.display = wl_display_connect(NULL)) == NULL) {
-        fprintf(stderr, "Error conecting to display.\n");
+        fprintf(stderr, "Error conecting to display: %s.\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
