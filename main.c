@@ -635,7 +635,7 @@ static void create_buffer(void) {
         exit(EXIT_FAILURE);
 	}
 
-    w.draw_buffer = mmap(NULL, (usize) w.alloc_size,
+    w.draw_buffer = mmap(NULL, (size_t) w.alloc_size,
                          PROT_READ | PROT_WRITE, MAP_SHARED,
                          fd, 0);
     if (w.draw_buffer == MAP_FAILED) {
@@ -647,7 +647,7 @@ static void create_buffer(void) {
     w.shm_pool = wl_shm_create_pool(w.shm, fd, w.alloc_size);
 
     resize_window(WIDTH, HEIGHT);
-    memset(w.draw_buffer, 0xFF, (usize) w.alloc_size);
+    memset(w.draw_buffer, 0xFF, (size_t) w.alloc_size);
     return;
 }
 
