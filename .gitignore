@@ -10,3 +10,5 @@ xdg-shell-client-protocol.h
 xdg-shell-protocol.c
 temp_delete_me
 wayland-play
+*.cmd
+*.o
