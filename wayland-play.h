@@ -15,19 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef WAYLAND_PLAY_H
+#if !defined(WAYLAND_PLAY_H)
 #define WAYLAND_PLAY_H
-
-#include <errno.h>
-#include <fcntl.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <time.h>
-#include <unistd.h>
 
 #include <linux/input-event-codes.h>
 #include <wayland-client.h>
@@ -37,45 +26,33 @@
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 #include "xdg-shell-client-protocol.h"
+#include "cbase.h"
 
-#define MIN(a,b) (a) < (b) ? (a) : (b)
-#define MAX(a,b) (a) > (b) ? (a) : (b)
-#define LENGTH(X) (int) (sizeof(X) / sizeof(*X))
+#define WINDOW_WIDTH 512
+#define WINDOW_HEIGHT 512
+#define WINDOW_WIDTH_MIN 128
+#define WINDOW_HEIGHT_MIN 128
+#define WINDOW_WIDTH_MAX 1920
+#define WINDOW_HEIGHT_MAX 1080
 
-#define WIDTH 512
-#define HEIGHT 512
-#define WIDTH_MIN 128
-#define HEIGHT_MIN 128
-#define WIDTH_MAX 1920
-#define HEIGHT_MAX 1080
+#define PALETTE_COLORS 4
+#define SHM_NAME_RANDOM_BYTES 6
+#define SHM_CREATE_RETRIES 100
+#define BYTES_PER_PIXEL 4
+#define WAYLAND_KEYCODE_OFFSET 8
+#define ALPHA_SHIFT 24
+#define ALPHA_STEP 0x0F
+#define ALPHA_MIN 0x00
+#define ALPHA_MAX 0xFF
+#define ALPHA_DEFAULT 0xCC
 
-#ifndef INTEGERS
-#define INTEGERS
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ulonglong;
-
-typedef long long llong;
-
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-#endif
-
-struct Keyboard {
+typedef struct Keyboard {
     struct xkb_context *xkb_context;
     struct xkb_keymap *xkb_keymap;
     struct xkb_state *xkb_state;
-};
+} Keyboard;
 
-struct Window {
+typedef struct Window {
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_buffer *buffer;
@@ -89,23 +66,17 @@ struct Window {
     struct wl_pointer *wl_pointer;
     struct wl_keyboard *wl_keyboard;
 
-    int width;
-    int height;
-    int size;
-    int alloc_size;
-    int dirty;
+    uint32 *draw_buffer;
 
-    uint32 pallete[4];
+    int32 width;
+    int32 height;
+    int32 alloc_size;
+    int32 x;
+    int32 y;
+
+    uint32 palette[PALETTE_COLORS];
     uint32 alpha;
-    void *draw_buffer;
-    int x;
-    int y;
-};
-
-extern uint32 red[4];
-extern uint32 green[4];
-extern uint32 blue[4];
-extern uint32 gray[4];
-extern uint32 *palletes[4];
+    bool dirty;
+} Window;
 
 #endif /* WAYLAND_PLAY_H */

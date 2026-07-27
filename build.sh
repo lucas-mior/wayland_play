@@ -13,7 +13,9 @@ SOURCES=main.c
 wayland_config_loaded=false
 
 base_cflags() {
-    printf '%s' "${CFLAGS:+$CFLAGS }-std=c99 -D_DEFAULT_SOURCE -Wall -Wextra"
+    printf '%s' "${CFLAGS:+$CFLAGS }"
+    printf '%s' '-std=c11 -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700 '
+    printf '%s' '-Icbase -Wall -Wextra'
 }
 
 load_wayland_config() {
@@ -88,10 +90,17 @@ build_wayland_play() {
     build_xdg_shell_object
     load_wayland_config
 
-    if needs_rebuild "$PROG" $HEADERS $SOURCES $OBJS "$0"; then
+    if needs_rebuild "$PROG" \
+        $HEADERS \
+        $SOURCES \
+        $OBJS \
+        cbase/*.c \
+        cbase/*.h \
+        "$0"; then
         ctags --kinds-C=+l *.h *.c
         vtags.sed tags > .tags.vim
-        $BUILD_CC $BUILD_CFLAGS -o "$PROG" $SOURCES $OBJS $WAYLAND_FLAGS -lxkbcommon
+        $BUILD_CC $BUILD_CFLAGS -o "$PROG" \
+            $SOURCES $OBJS $WAYLAND_FLAGS -lxkbcommon
     fi
 }
 
@@ -108,7 +117,7 @@ release_target() {
 debug_target() {
     clean_target
     BUILD_CC=${CC:-cc}
-    BUILD_CFLAGS="$(base_cflags) -g -Dwayland-play_DEBUG -fsanitize=undefined"
+    BUILD_CFLAGS="$(base_cflags) -g -DDEBUGGING=1 -fsanitize=undefined"
     build_wayland_play
 }
 
@@ -166,7 +175,11 @@ run_target() {
             uninstall_target
             ;;
         *)
-            printf 'usage: %s [all|release|debug|clang|wayland-play|xdg-shell-client-protocol.h|xdg-shell-protocol.c|xdg-shell-protocol.o|clean|install|uninstall]\n' "$0" >&2
+            cat >&2 <<EOF
+usage: $0 [all|release|debug|clang|wayland-play|\
+xdg-shell-client-protocol.h|xdg-shell-protocol.c|xdg-shell-protocol.o|\
+clean|install|uninstall]
+EOF
             exit 2
             ;;
     esac
