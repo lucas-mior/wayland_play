@@ -30,7 +30,7 @@ EOF_TARGETS
 )
 fi
 
-target="${1:-build}"
+target="${1:-debug}"
 
 if ! printf '%s\n' "$targets" | grep -qx "$target"; then
     echo "usage: $script <targets>"
