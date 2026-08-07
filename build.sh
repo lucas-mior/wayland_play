@@ -16,11 +16,25 @@ cd "$dir" || exit
 program=$(basename "$(readlink -f "$(dirname "$0")")")
 script=$(basename "$0")
 
+if [ -f ./targets ]; then
+    targets=$(cat ./targets)
+else
+    targets=$(cat <<'EOF_TARGETS'
+build
+debug
+fast_feedback
+install
+uninstall
+test
+EOF_TARGETS
+)
+fi
+
 target="${1:-build}"
 
-if ! grep -qx "$target" ./targets; then
+if ! printf '%s\n' "$targets" | grep -qx "$target"; then
     echo "usage: $script <targets>"
-    cat ./targets
+    printf '%s\n' "$targets"
     exit 1
 fi
 
