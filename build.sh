@@ -114,18 +114,18 @@ if echo "$OS" | grep -q "Linux"; then
 fi
 
 case "$target" in
-"debug")
+debug)
     CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -Wno-unused-function"
     exe="bin/${program}_debug"
     ;;
-"build")
+build)
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
-"fast_feedback")
+fast_feedback)
     CFLAGS="$CFLAGS $GNUSOURCE -Werror"
     ;;
-"test"|"install"|"uninstall")
+test|install|uninstall)
     ;;
 *)
     CFLAGS="$CFLAGS -O2"
@@ -227,19 +227,19 @@ build_program () {
 }
 
 case "$target" in
-"fast_feedback")
+fast_feedback)
     build_program
     LC_ALL=C "$exe"
     ;;
-"test")
+test)
     exit
     ;;
-"uninstall")
+uninstall)
     trace_on
     rm -f "${DESTDIR}${PREFIX}/bin/${program}"
     trace_off
     ;;
-"install")
+install)
     if [ ! -f "bin/$program" ]; then
         "$0" build
     fi
