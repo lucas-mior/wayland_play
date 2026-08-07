@@ -1,46 +1,144 @@
-#!/bin/sh
-set -eu
+#!/bin/sh -e
 
-PREFIX=${PREFIX:-/usr/local}
-PKG_CONFIG=${PKG_CONFIG:-pkg-config}
-RM=${RM:-rm -f}
+set -e
 
-PROG=wayland-play
-OBJS=xdg-shell-protocol.o
-HEADERS=xdg-shell-client-protocol.h
-SOURCES=main.c
+if [ -n "$BASH_VERSION" ]; then
+    # shellcheck disable=SC3044
+    shopt -s expand_aliases
+fi
+
+alias trace_on='set -x'
+alias trace_off='{ set +x; } 2>/dev/null'
+
+dir=$(dirname "$(readlink -f "$0")")
+CPPFLAGS="$CPPFLAGS -I$dir/cbase"
+cd "$dir" || exit
+program=$(basename "$(readlink -f "$(dirname "$0")")")
+script=$(basename "$0")
+
+target="${1:-build}"
+
+if ! grep -qx "$target" ./targets; then
+    echo "usage: $script <targets>"
+    cat ./targets
+    exit 1
+fi
+
+printf "\n%s %s\n" "$script" "$target"
+
+PREFIX="${PREFIX:-/usr/local}"
+DESTDIR="${DESTDIR:-/}"
+PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
+
+main="main.c"
+exe="bin/$program"
+xdg_header="xdg-shell-client-protocol.h"
+xdg_source="xdg-shell-protocol.c"
+xdg_object="bin/xdg-shell-protocol.o"
+mkdir -p "$(dirname "$exe")"
+
+CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
+CFLAGS="$CFLAGS -std=c11"
+CFLAGS="$CFLAGS -Wfatal-errors"
+CFLAGS="$CFLAGS -Wextra -Wall"
+CFLAGS="$CFLAGS -Werror"
+CFLAGS="$CFLAGS -Wno-format-pedantic"
+CFLAGS="$CFLAGS -Wno-unknown-warning-option"
+CFLAGS="$CFLAGS -Wno-gnu-union-cast"
+CFLAGS="$CFLAGS -Wno-unused-macros"
+CFLAGS="$CFLAGS -Wno-constant-logical-operand"
+CFLAGS="$CFLAGS -Wno-float-equal"
+CFLAGS="$CFLAGS -Wno-undefined-internal"
+CFLAGS="$CFLAGS -Wno-cast-qual"
+CFLAGS="$CFLAGS -Wno-unknown-pragmas"
+CFLAGS="$CFLAGS -Wno-char-subscripts"
+
+OS=$(uname -a)
+CC="${CC:-cc}"
+GNUSOURCE=
+
+if [ "$CC" = "clang" ]; then
+    CFLAGS="$CFLAGS -Weverything"
+    CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
+    CFLAGS="$CFLAGS -Wno-format-nonliteral"
+    CFLAGS="$CFLAGS -Wno-disabled-macro-expansion"
+    CFLAGS="$CFLAGS -Wno-c++-keyword"
+    CFLAGS="$CFLAGS -Wno-pre-c11-compat"
+    CFLAGS="$CFLAGS -Wno-implicit-void-ptr-cast"
+    CFLAGS="$CFLAGS -Wno-ignored-attributes"
+    CFLAGS="$CFLAGS -Wno-covered-switch-default"
+    CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
+    CFLAGS="$CFLAGS -Wno-implicit-int-enum-cast"
+    CFLAGS="$CFLAGS -Wno-assign-enum"
+    CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
+    CFLAGS="$CFLAGS -Wno-bad-function-cast"
+    CFLAGS="$CFLAGS -Wno-char-subscripts"
+    CFLAGS="$CFLAGS -Wno-padded"
+fi
+
+if echo "$OS" | grep -q "Linux"; then
+    if echo "$OS" | grep -q "GNU"; then
+        GNUSOURCE="-D_GNU_SOURCE"
+    fi
+fi
+
+case "$target" in
+"debug")
+    CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
+    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -Wno-unused-function"
+    exe="bin/${program}_debug"
+    ;;
+"build")
+    CFLAGS="$CFLAGS $GNUSOURCE -g3 -O2 -flto -march=native -ftree-vectorize"
+    ;;
+"fast_feedback")
+    CC=clang
+    CFLAGS="$CFLAGS $GNUSOURCE -Werror"
+    ;;
+"test"|"install"|"uninstall")
+    ;;
+*)
+    CFLAGS="$CFLAGS -O2"
+    ;;
+esac
+
+case "$OS" in
+*Linux*)
+    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
+    ;;
+*Darwin*)
+    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
+    ;;
+esac
 
 wayland_config_loaded=false
 
-base_cflags() {
-    printf '%s' "${CFLAGS:+$CFLAGS }"
-    printf '%s' '-std=c11 -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=700 '
-    printf '%s' '-Icbase -Wall -Wextra'
-}
-
-load_wayland_config() {
+load_wayland_config () {
     if [ "$wayland_config_loaded" = true ]; then
         return
     fi
 
-    WAYLAND_FLAGS=$($PKG_CONFIG wayland-client --cflags --libs)
+    WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
+    WAYLAND_LDFLAGS=$($PKG_CONFIG wayland-client xkbcommon --libs)
     WAYLAND_PROTOCOLS_DIR=$($PKG_CONFIG wayland-protocols --variable=pkgdatadir)
-    WAYLAND_SCANNER=$(pkg-config --variable=wayland_scanner wayland-scanner)
+    WAYLAND_SCANNER=$($PKG_CONFIG wayland-scanner --variable=wayland_scanner)
     XDG_SHELL_PROTOCOL=$WAYLAND_PROTOCOLS_DIR/stable/xdg-shell/xdg-shell.xml
 
+    CPPFLAGS="$CPPFLAGS $WAYLAND_CFLAGS"
+    LDFLAGS="$LDFLAGS $WAYLAND_LDFLAGS"
     wayland_config_loaded=true
 }
 
-needs_rebuild() {
-    target=$1
+needs_rebuild () {
+    rebuild_target="$1"
     shift
 
-    if [ ! -e "$target" ]; then
+    if [ ! -e "$rebuild_target" ]; then
         return 0
     fi
 
     for dep do
-        if [ ! -e "$dep" ] || [ "$dep" -nt "$target" ]; then
+        if [ ! -e "$dep" ] || [ "$dep" -nt "$rebuild_target" ]; then
             return 0
         fi
     done
@@ -48,147 +146,79 @@ needs_rebuild() {
     return 1
 }
 
-ensure_xdg_shell_header() {
+ensure_xdg_shell_header () {
     load_wayland_config
 
-    if [ ! -f xdg-shell-client-protocol.h ]; then
+    if needs_rebuild "$xdg_header" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" client-header \
             "$XDG_SHELL_PROTOCOL" \
-            xdg-shell-client-protocol.h
+            "$xdg_header"
     fi
 }
 
-ensure_xdg_shell_source() {
+ensure_xdg_shell_source () {
     load_wayland_config
 
-    if [ ! -f xdg-shell-protocol.c ]; then
+    if needs_rebuild "$xdg_source" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" private-code \
             "$XDG_SHELL_PROTOCOL" \
-            xdg-shell-protocol.c
+            "$xdg_source"
     fi
 }
 
-build_xdg_shell_object() {
-    : "${BUILD_CC:=${CC:-cc}}"
-
+build_xdg_shell_object () {
     ensure_xdg_shell_header
     ensure_xdg_shell_source
 
-    if needs_rebuild xdg-shell-protocol.o \
-        xdg-shell-protocol.c \
-        xdg-shell-client-protocol.h \
-        "$0"; then
-        $BUILD_CC -std=c99 -c -o xdg-shell-protocol.o xdg-shell-protocol.c
+    if needs_rebuild "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
+        $CC $WAYLAND_CFLAGS -std=c99 -c -o "$xdg_object" "$xdg_source"
     fi
 }
 
-build_wayland_play() {
-    : "${BUILD_CC:=${CC:-cc}}"
-    : "${BUILD_CFLAGS:=$(base_cflags)}"
+build_tags () {
+    if command -v ctags >/dev/null 2>&1; then
+        find . -iname "*.[ch]" -print0 \
+            | xargs -0 ctags --kinds-C=+l+d || true
+    fi
 
-    ensure_xdg_shell_header
-    build_xdg_shell_object
+    if [ -f tags ] && command -v vtags.sed >/dev/null 2>&1; then
+        vtags.sed tags | sort | uniq > .tags.vim || true
+    fi
+}
+
+build_program () {
     load_wayland_config
+    build_xdg_shell_object
+    build_tags
 
-    if needs_rebuild "$PROG" \
-        $HEADERS \
-        $SOURCES \
-        $OBJS \
-        cbase/*.c \
-        cbase/*.h \
-        "$0"; then
-        ctags --kinds-C=+l *.h *.c
-        vtags.sed tags > .tags.vim
-        $BUILD_CC $BUILD_CFLAGS -o "$PROG" \
-            $SOURCES $OBJS $WAYLAND_FLAGS -lxkbcommon
+    trace_on
+    $CC $CPPFLAGS $CFLAGS -o "$exe" "$main" "$xdg_object" $LDFLAGS
+    trace_off
+}
+
+case "$target" in
+"fast_feedback")
+    build_program
+    LC_ALL=C "$exe"
+    ;;
+"test")
+    exit
+    ;;
+"uninstall")
+    trace_on
+    rm -f "${DESTDIR}${PREFIX}/bin/${program}"
+    trace_off
+    ;;
+"install")
+    if [ ! -f "bin/$program" ]; then
+        "$0" build
     fi
-}
 
-clean_target() {
-    $RM wayland-play xdg-shell-protocol.c xdg-shell-client-protocol.h
-}
-
-release_target() {
-    BUILD_CC=${CC:-cc}
-    BUILD_CFLAGS="$(base_cflags) -O2 -flto"
-    build_wayland_play
-}
-
-debug_target() {
-    clean_target
-    BUILD_CC=${CC:-cc}
-    BUILD_CFLAGS="$(base_cflags) -g -DDEBUGGING=1 -fsanitize=undefined"
-    build_wayland_play
-}
-
-clang_target() {
-    clean_target
-    BUILD_CC=clang
-    BUILD_CFLAGS="$(base_cflags) -Weverything -Wno-unsafe-buffer-usage"
-    build_wayland_play
-}
-
-install_target() {
-    install -Dm755 wayland-play "${DESTDIR:-}$PREFIX/bin/wayland-play"
-}
-
-uninstall_target() {
-    rm -f "${DESTDIR:-}$PREFIX/bin/wayland-play"
-}
-
-run_target() {
-    case $1 in
-        all)
-            release_target
-            ;;
-        release)
-            release_target
-            ;;
-        debug)
-            debug_target
-            ;;
-        clang)
-            clang_target
-            ;;
-        wayland-play)
-            BUILD_CC=${CC:-cc}
-            BUILD_CFLAGS=$(base_cflags)
-            build_wayland_play
-            ;;
-        xdg-shell-client-protocol.h)
-            ensure_xdg_shell_header
-            ;;
-        xdg-shell-protocol.c)
-            ensure_xdg_shell_source
-            ;;
-        xdg-shell-protocol.o)
-            BUILD_CC=${CC:-cc}
-            build_xdg_shell_object
-            ;;
-        clean)
-            clean_target
-            ;;
-        install)
-            install_target
-            ;;
-        uninstall)
-            uninstall_target
-            ;;
-        *)
-            cat >&2 <<EOF
-usage: $0 [all|release|debug|clang|wayland-play|\
-xdg-shell-client-protocol.h|xdg-shell-protocol.c|xdg-shell-protocol.o|\
-clean|install|uninstall]
-EOF
-            exit 2
-            ;;
-    esac
-}
-
-if [ $# -eq 0 ]; then
-    set -- all
-fi
-
-for target do
-    run_target "$target"
-done
+    trace_on
+    install -Dm755 "bin/$program" "${DESTDIR}${PREFIX}/bin/${program}"
+    trace_off
+    ;;
+*)
+    build_program
+    ;;
+esac
