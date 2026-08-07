@@ -68,7 +68,15 @@ CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wno-char-subscripts"
 
 OS=$(uname -a)
-CC="${CC:-cc}"
+requested_cc=${CC:-}
+case "$target" in
+"debug"|"test"|"fast_feedback")
+    CC="${requested_cc:-tcc}"
+    ;;
+*)
+    CC="${requested_cc:-cc}"
+    ;;
+esac
 GNUSOURCE=
 
 if [ "$CC" = "clang" ]; then
@@ -106,7 +114,6 @@ case "$target" in
     CFLAGS="$CFLAGS $GNUSOURCE -g3 -O2 -flto -march=native -ftree-vectorize"
     ;;
 "fast_feedback")
-    CC=clang
     CFLAGS="$CFLAGS $GNUSOURCE -Werror"
     ;;
 "test"|"install"|"uninstall")
