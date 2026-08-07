@@ -1,17 +1,11 @@
 #!/bin/sh -e
 
 # shellcheck disable=SC2086
-set -e
-
-if [ -n "$BASH_VERSION" ]; then
-    # shellcheck disable=SC3044
-    shopt -s expand_aliases
-fi
-
-alias trace_on='set -x'
-alias trace_off='{ set +x; } 2>/dev/null'
 
 dir=$(dirname "$(readlink -f "$0")")
+# shellcheck source=/dev/null
+. "$dir/cbase/common.sh"
+
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 cd "$dir" || exit
 program=$(basename "$(readlink -f "$(dirname "$0")")")
