@@ -38,7 +38,6 @@ PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 PKG_CONFIG="${PKG_CONFIG:-pkg-config}"
 
-main="main.c"
 exe="bin/$program"
 xdg_header="xdg-shell-client-protocol.h"
 xdg_source="xdg-shell-protocol.c"
@@ -160,7 +159,7 @@ build_program () {
     build_tags
 
     trace_on
-    $CC $CPPFLAGS $CFLAGS -o "$exe" "$main" "$xdg_object" $LDFLAGS
+    $CC $CPPFLAGS $CFLAGS -o "$exe" "main.c" "$xdg_object" $LDFLAGS
     trace_off
 }
 
