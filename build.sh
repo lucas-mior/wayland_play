@@ -45,6 +45,22 @@ xdg_source="xdg-shell-protocol.c"
 xdg_object="bin/xdg-shell-protocol.o"
 mkdir -p "$(dirname "$exe")"
 
+case "$target" in
+debug|test)
+    CC="${CC:-tcc}"
+    ;;
+fast_feedback)
+    CC="${CC:-clang}"
+    ;;
+*)
+    CC="${CC:-cc}"
+    ;;
+esac
+
+if ! command -v "$CC" > /dev/null 2>&1; then
+    CC=cc
+fi
+
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 
@@ -64,26 +80,6 @@ CFLAGS="$CFLAGS -Wno-unknown-pragmas"
 CFLAGS="$CFLAGS -Wno-unknown-warning-option"
 CFLAGS="$CFLAGS -Wno-unused-macros"
 
-OS=$(uname -a)
-
-case "$target" in
-debug|test)
-    CC="${CC:-tcc}"
-    ;;
-fast_feedback)
-    CC="${CC:-clang}"
-    ;;
-*)
-    CC="${CC:-cc}"
-    ;;
-esac
-
-if ! command -v "$CC" > /dev/null 2>&1; then
-    CC=cc
-fi
-
-GNUSOURCE=
-
 if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything"
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage"
@@ -101,6 +97,10 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-bad-function-cast"
     CFLAGS="$CFLAGS -Wno-padded"
 fi
+
+OS=$(uname -a)
+
+GNUSOURCE=
 
 if echo "$OS" | grep -q "Linux"; then
     if echo "$OS" | grep -q "GNU"; then
