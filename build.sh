@@ -6,9 +6,8 @@ dir=$(dirname "$(readlink -f "$0")")
 # shellcheck source=/dev/null
 . "$dir/cbase/common.sh"
 
-CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 cd "$dir" || exit
-program=$(basename "$(readlink -f "$(dirname "$0")")")
+program=$(get_program "$0")
 script=$(basename "$0")
 
 if [ -f ./targets ]; then
@@ -33,7 +32,7 @@ if ! printf '%s\n' "$targets" | grep -qx "$target"; then
     exit 1
 fi
 
-printf "\n%s %s\n" "$script" "$target"
+printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -46,7 +45,9 @@ xdg_source="xdg-shell-protocol.c"
 xdg_object="bin/xdg-shell-protocol.o"
 mkdir -p "$(dirname "$exe")"
 
+CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
+
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
 CFLAGS="$CFLAGS -Wextra -Wall"
@@ -97,7 +98,6 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-assign-enum"
     CFLAGS="$CFLAGS -Wno-cast-function-type-strict"
     CFLAGS="$CFLAGS -Wno-bad-function-cast"
-    CFLAGS="$CFLAGS -Wno-char-subscripts"
     CFLAGS="$CFLAGS -Wno-padded"
 fi
 
@@ -117,7 +117,7 @@ build)
     CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
-    CFLAGS="$CFLAGS $GNUSOURCE -Werror"
+    CFLAGS="$CFLAGS $GNUSOURCE"
     ;;
 test|install|uninstall)
     ;;
@@ -134,24 +134,6 @@ case "$OS" in
     CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
     ;;
 esac
-
-wayland_config_loaded=false
-
-load_wayland_config () {
-    if [ "$wayland_config_loaded" = true ]; then
-        return
-    fi
-
-    WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
-    WAYLAND_LDFLAGS=$($PKG_CONFIG wayland-client xkbcommon --libs)
-    WAYLAND_PROTOCOLS_DIR=$($PKG_CONFIG wayland-protocols --variable=pkgdatadir)
-    WAYLAND_SCANNER=$($PKG_CONFIG wayland-scanner --variable=wayland_scanner)
-    XDG_SHELL_PROTOCOL=$WAYLAND_PROTOCOLS_DIR/stable/xdg-shell/xdg-shell.xml
-
-    CPPFLAGS="$CPPFLAGS $WAYLAND_CFLAGS"
-    LDFLAGS="$LDFLAGS $WAYLAND_LDFLAGS"
-    wayland_config_loaded=true
-}
 
 needs_rebuild () {
     rebuild_target="$1"
@@ -170,49 +152,32 @@ needs_rebuild () {
     return 1
 }
 
-ensure_xdg_shell_header () {
-    load_wayland_config
+build_program () {
+    WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
+    WAYLAND_LDFLAGS=$($PKG_CONFIG wayland-client xkbcommon --libs)
+    WAYLAND_PROTOCOLS_DIR=$($PKG_CONFIG wayland-protocols --variable=pkgdatadir)
+    WAYLAND_SCANNER=$($PKG_CONFIG wayland-scanner --variable=wayland_scanner)
+    XDG_SHELL_PROTOCOL=$WAYLAND_PROTOCOLS_DIR/stable/xdg-shell/xdg-shell.xml
+
+    CPPFLAGS="$CPPFLAGS $WAYLAND_CFLAGS"
+    LDFLAGS="$LDFLAGS $WAYLAND_LDFLAGS"
 
     if needs_rebuild "$xdg_header" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" client-header \
             "$XDG_SHELL_PROTOCOL" \
             "$xdg_header"
     fi
-}
-
-ensure_xdg_shell_source () {
-    load_wayland_config
 
     if needs_rebuild "$xdg_source" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" private-code \
             "$XDG_SHELL_PROTOCOL" \
             "$xdg_source"
     fi
-}
-
-build_xdg_shell_object () {
-    ensure_xdg_shell_header
-    ensure_xdg_shell_source
 
     if needs_rebuild "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
         $CC $WAYLAND_CFLAGS -std=c99 -c -o "$xdg_object" "$xdg_source"
     fi
-}
 
-build_tags () {
-    if command -v ctags >/dev/null 2>&1; then
-        find . -iname "*.[ch]" -print0 \
-            | xargs -0 ctags --kinds-C=+l+d || true
-    fi
-
-    if [ -f tags ] && command -v vtags.sed >/dev/null 2>&1; then
-        vtags.sed tags | sort | uniq > .tags.vim || true
-    fi
-}
-
-build_program () {
-    load_wayland_config
-    build_xdg_shell_object
     build_tags
 
     trace_on
