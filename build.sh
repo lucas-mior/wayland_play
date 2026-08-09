@@ -113,22 +113,6 @@ case "$OS" in
     ;;
 esac
 
-needs_rebuild () {
-    rebuild_target="$1"
-    shift
-
-    if [ ! -e "$rebuild_target" ]; then
-        return 0
-    fi
-
-    for dep do
-        if [ ! -e "$dep" ] || [ "$dep" -nt "$rebuild_target" ]; then
-            return 0
-        fi
-    done
-
-    return 1
-}
 
 build_program () {
     WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
