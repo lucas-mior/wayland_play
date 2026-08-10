@@ -47,7 +47,6 @@ mkdir -p "$(dirname "$exe")"
 CC=$(get_compiler "$target")
 
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
-CPPFLAGS="$CPPFLAGS -D_DEFAULT_SOURCE"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
@@ -75,27 +74,16 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-OS=$(uname -a)
-
-GNUSOURCE=
-
-if echo "$OS" | grep -q "Linux"; then
-    if echo "$OS" | grep -q "GNU"; then
-        GNUSOURCE="-D_GNU_SOURCE"
-    fi
-fi
-
 case "$target" in
 debug)
     CFLAGS="$CFLAGS -g3 -O0 -fsanitize=undefined"
-    CPPFLAGS="$CPPFLAGS $GNUSOURCE -DDEBUGGING=1 -Wno-unused-function"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     exe="bin/${program}_debug"
     ;;
 build)
-    CFLAGS="$CFLAGS $GNUSOURCE -O2 -flto -march=native -ftree-vectorize"
+    CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
 fast_feedback)
-    CFLAGS="$CFLAGS $GNUSOURCE"
     ;;
 test|install|uninstall)
     ;;
@@ -106,10 +94,9 @@ esac
 
 case "$OS" in
 *Linux*)
-    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700"
     ;;
 *Darwin*)
-    CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=700 -D_DARWIN_C_SOURCE"
+    CPPFLAGS="$CPPFLAGS -D_DARWIN_C_SOURCE"
     ;;
 esac
 
@@ -137,7 +124,7 @@ build_program () {
     fi
 
     if needs_rebuild "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
-        $CC $WAYLAND_CFLAGS -std=c99 -c -o "$xdg_object" "$xdg_source"
+        $CC $CPPFLAGS $WAYLAND_CFLAGS -std=c99 -c -o "$xdg_object" "$xdg_source"
     fi
 
     build_tags

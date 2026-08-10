@@ -16,6 +16,7 @@
  */
 
 #define CBASE_IMPLEMENT
+#include "cbase.h"
 #include "wayland-play.h"
 
 #define NORMAL_EXIT_MESSAGE \
