@@ -14,3 +14,4 @@ wapp
 wayland-play
 xdg-shell-client-protocol.h
 xdg-shell-protocol.c
+*.obj
