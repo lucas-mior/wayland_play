@@ -24,15 +24,10 @@ EOF_TARGETS
 )
 fi
 
-target="${1:-debug}"
+build_parse_args "$@"
+build_validate_mode "$script" "$targets"
 
-if ! printf '%s\n' "$targets" | grep -qx "$target"; then
-    echo "usage: $script <targets>"
-    printf '%s\n' "$targets"
-    exit 1
-fi
-
-printf "\n${script} ${RED}${1:-} ${2:-}$RES\n"
+build_print_invocation "$script"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -44,7 +39,7 @@ xdg_source="xdg-shell-protocol.c"
 xdg_object="bin/xdg-shell-protocol.o"
 mkdir -p "$(dirname "$exe")"
 
-CC=$(get_compiler "$target")
+CC=$(get_compiler "$mode")
 
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 
@@ -74,7 +69,7 @@ if [ "$CC" = "clang" ]; then
     CFLAGS="$CFLAGS -Wno-used-but-marked-unused"
 fi
 
-case "$target" in
+case "$mode" in
 debug)
     CFLAGS="$CFLAGS -g3 -Og -fsanitize=undefined"
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
@@ -134,13 +129,13 @@ build_program () {
     trace_off
 }
 
-case "$target" in
+case "$mode" in
 fast_feedback)
     build_program
     LC_ALL=C "$exe"
     ;;
 test)
-    TEST_EXCLUDE_PATTERN='(^|/)cbase/' test "$2"
+    TEST_EXCLUDE_PATTERN='(^|/)cbase/' test "$target"
     exit
     ;;
 uninstall)

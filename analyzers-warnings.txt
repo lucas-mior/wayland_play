@@ -1,7 +1,0 @@
-usage: build.sh <targets>
-build
-debug
-fast_feedback
-install
-uninstall
-test
