@@ -106,19 +106,19 @@ build_program () {
     CPPFLAGS="$CPPFLAGS $WAYLAND_CFLAGS"
     LDFLAGS="$LDFLAGS $WAYLAND_LDFLAGS"
 
-    if common_needs_rebuild "$xdg_header" "$XDG_SHELL_PROTOCOL" "$0"; then
+    if common_outdated "$xdg_header" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" client-header \
             "$XDG_SHELL_PROTOCOL" \
             "$xdg_header"
     fi
 
-    if common_needs_rebuild "$xdg_source" "$XDG_SHELL_PROTOCOL" "$0"; then
+    if common_outdated "$xdg_source" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" private-code \
             "$XDG_SHELL_PROTOCOL" \
             "$xdg_source"
     fi
 
-    if common_needs_rebuild "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
+    if common_outdated "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
         $CC $CPPFLAGS $WAYLAND_CFLAGS -std=c99 -c -o "$xdg_object" "$xdg_source"
     fi
 
