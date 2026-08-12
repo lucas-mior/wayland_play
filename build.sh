@@ -7,7 +7,7 @@ dir=$(dirname "$(readlink -f "$0")")
 . "$dir/cbase/common.sh"
 
 cd "$dir" || exit
-program=$(get_program "$0")
+program=$(common_get_program "$0")
 script=$(basename "$0")
 
 if [ -f ./targets ]; then
@@ -24,10 +24,10 @@ EOF_TARGETS
 )
 fi
 
-build_parse_args "$@"
-build_validate_mode "$script" "$targets"
+common_build_parse_args "$@"
+common_build_validate_mode "$script" "$targets"
 
-build_print_invocation "$script"
+common_build_print_invocation "$script"
 
 PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
@@ -39,7 +39,7 @@ xdg_source="xdg-shell-protocol.c"
 xdg_object="bin/xdg-shell-protocol.o"
 mkdir -p "$(dirname "$exe")"
 
-CC=$(get_compiler "$mode")
+CC=$(common_get_compiler "$mode")
 
 CPPFLAGS="$CPPFLAGS -I$dir/cbase"
 
@@ -106,23 +106,23 @@ build_program () {
     CPPFLAGS="$CPPFLAGS $WAYLAND_CFLAGS"
     LDFLAGS="$LDFLAGS $WAYLAND_LDFLAGS"
 
-    if needs_rebuild "$xdg_header" "$XDG_SHELL_PROTOCOL" "$0"; then
+    if common_needs_rebuild "$xdg_header" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" client-header \
             "$XDG_SHELL_PROTOCOL" \
             "$xdg_header"
     fi
 
-    if needs_rebuild "$xdg_source" "$XDG_SHELL_PROTOCOL" "$0"; then
+    if common_needs_rebuild "$xdg_source" "$XDG_SHELL_PROTOCOL" "$0"; then
         "$WAYLAND_SCANNER" private-code \
             "$XDG_SHELL_PROTOCOL" \
             "$xdg_source"
     fi
 
-    if needs_rebuild "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
+    if common_needs_rebuild "$xdg_object" "$xdg_source" "$xdg_header" "$0"; then
         $CC $CPPFLAGS $WAYLAND_CFLAGS -std=c99 -c -o "$xdg_object" "$xdg_source"
     fi
 
-    build_tags
+    common_build_tags
 
     trace_on
     $CC $CPPFLAGS $CFLAGS -o "$exe" main.c "$xdg_object" $LDFLAGS
@@ -135,7 +135,7 @@ fast_feedback)
     LC_ALL=C "$exe"
     ;;
 test)
-    TEST_EXCLUDE_PATTERN='(^|/)cbase/' test "$target"
+    TEST_EXCLUDE_PATTERN='(^|/)cbase/' common_test "$target"
     exit
     ;;
 uninstall)
