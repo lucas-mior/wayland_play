@@ -11,22 +11,8 @@ cd "$dir" || exit
 program=$(common_get_program "$0")
 script=$(basename "$0")
 
-if [ -f ./targets ]; then
-    targets=$(cat ./targets)
-else
-    targets=$(cat <<'EOF_TARGETS'
-build
-debug
-fast_feedback
-install
-uninstall
-test
-EOF_TARGETS
-)
-fi
 
 common_build_parse_args "$@"
-common_build_validate_mode "$script" "$targets"
 
 common_build_print_invocation "$script"
 
@@ -84,7 +70,6 @@ fast_feedback)
 test|install|uninstall)
     ;;
 *)
-    CFLAGS="$CFLAGS -O2"
     ;;
 esac
 
@@ -116,7 +101,7 @@ install)
     install -Dm755 "bin/$program" "${DESTDIR}${PREFIX}/bin/${program}"
     trace_off
     ;;
-*)
+build|debug|fast_feedback)
     WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
     WAYLAND_LDFLAGS=$($PKG_CONFIG wayland-client xkbcommon --libs)
     WAYLAND_PROTOCOLS_DIR=$($PKG_CONFIG wayland-protocols --variable=pkgdatadir)
@@ -147,5 +132,15 @@ install)
     trace_on
     $CC $CPPFLAGS $CFLAGS -o "$exe" main.c "$xdg_object" $LDFLAGS
     trace_off
+    ;;
+esac
+
+
+case "$mode" in
+build|debug|fast_feedback|install|test|uninstall)
+    ;;
+*)
+    echo "Unknown mode $mode"
+    exit 1
     ;;
 esac
