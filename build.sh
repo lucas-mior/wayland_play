@@ -15,7 +15,7 @@ script=$(basename "$0")
 common_build_parse_args "$@"
 
 case "$mode" in
-build|debug|fast_feedback|install|test|uninstall)
+build|check|debug|fast_feedback|install|test|uninstall)
     ;;
 *)
     common_build_unknown_mode
@@ -77,7 +77,7 @@ fast_feedback)
     ;;
 test|install|uninstall)
     ;;
-build|debug|fast_feedback|install|test|uninstall)
+build|check|debug|fast_feedback|install|test|uninstall)
     ;;
 *)
     common_build_unknown_mode
@@ -94,6 +94,9 @@ esac
 
 
 case "$mode" in
+check)
+    common_build_run_analyzers build
+    ;;
 test)
     TEST_EXCLUDE_PATTERN='(^|/)cbase/' common_test "$target"
     exit
