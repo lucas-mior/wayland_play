@@ -97,7 +97,26 @@ case "$OS" in
 esac
 
 
-build_program () {
+case "$mode" in
+test)
+    TEST_EXCLUDE_PATTERN='(^|/)cbase/' common_test "$target"
+    exit
+    ;;
+uninstall)
+    trace_on
+    rm -f "${DESTDIR}${PREFIX}/bin/${program}"
+    trace_off
+    ;;
+install)
+    if [ ! -f "bin/$program" ]; then
+        "$0" build
+    fi
+
+    trace_on
+    install -Dm755 "bin/$program" "${DESTDIR}${PREFIX}/bin/${program}"
+    trace_off
+    ;;
+*)
     WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
     WAYLAND_LDFLAGS=$($PKG_CONFIG wayland-client xkbcommon --libs)
     WAYLAND_PROTOCOLS_DIR=$($PKG_CONFIG wayland-protocols --variable=pkgdatadir)
@@ -128,32 +147,5 @@ build_program () {
     trace_on
     $CC $CPPFLAGS $CFLAGS -o "$exe" main.c "$xdg_object" $LDFLAGS
     trace_off
-}
-
-case "$mode" in
-fast_feedback)
-    build_program
-    LC_ALL=C "$exe"
-    ;;
-test)
-    TEST_EXCLUDE_PATTERN='(^|/)cbase/' common_test "$target"
-    exit
-    ;;
-uninstall)
-    trace_on
-    rm -f "${DESTDIR}${PREFIX}/bin/${program}"
-    trace_off
-    ;;
-install)
-    if [ ! -f "bin/$program" ]; then
-        "$0" build
-    fi
-
-    trace_on
-    install -Dm755 "bin/$program" "${DESTDIR}${PREFIX}/bin/${program}"
-    trace_off
-    ;;
-*)
-    build_program
     ;;
 esac
