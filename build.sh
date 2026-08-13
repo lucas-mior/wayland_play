@@ -14,6 +14,14 @@ script=$(basename "$0")
 
 common_build_parse_args "$@"
 
+case "$mode" in
+build|debug|fast_feedback|install|test|uninstall)
+    ;;
+*)
+    common_build_unknown_mode
+    ;;
+esac
+
 common_build_print_invocation "$script"
 
 PREFIX="${PREFIX:-/usr/local}"
@@ -69,7 +77,10 @@ fast_feedback)
     ;;
 test|install|uninstall)
     ;;
+build|debug|fast_feedback|install|test|uninstall)
+    ;;
 *)
+    common_build_unknown_mode
     ;;
 esac
 
@@ -132,15 +143,5 @@ build|debug|fast_feedback)
     trace_on
     $CC $CPPFLAGS $CFLAGS -o "$exe" main.c "$xdg_object" $LDFLAGS
     trace_off
-    ;;
-esac
-
-
-case "$mode" in
-build|debug|fast_feedback|install|test|uninstall)
-    ;;
-*)
-    echo "Unknown mode $mode"
-    exit 1
     ;;
 esac
