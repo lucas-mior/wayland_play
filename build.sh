@@ -15,7 +15,7 @@ script=$(basename "$0")
 common_build_parse_args "$@"
 
 case "$mode" in
-build|check|debug|fast_feedback|install|test|uninstall)
+build|check|debug|debug-fast|fast_feedback|install|test|uninstall)
     ;;
 *)
     common_build_unknown_mode
@@ -70,6 +70,10 @@ debug)
     CPPFLAGS="$CPPFLAGS -DDEBUGGING=1 -Wno-unused-function"
     exe="bin/$program"
     ;;
+debug-fast)
+    CFLAGS="$CFLAGS -g2 -O2 -flto -march=native -ftree-vectorize"
+    CPPFLAGS="$CPPFLAGS -DDEBUGGING=1"
+    ;;
 build)
     CFLAGS="$CFLAGS -O2 -flto -march=native -ftree-vectorize"
     ;;
@@ -77,7 +81,7 @@ fast_feedback)
     ;;
 test|install|uninstall)
     ;;
-build|check|debug|fast_feedback|install|test|uninstall)
+build|check|debug|debug-fast|fast_feedback|install|test|uninstall)
     ;;
 *)
     common_build_unknown_mode
@@ -115,7 +119,7 @@ install)
     install -Dm755 "bin/$program" "${DESTDIR}${PREFIX}/bin/${program}"
     trace_off
     ;;
-build|debug|fast_feedback)
+build|debug|debug-fast|fast_feedback)
     WAYLAND_CFLAGS=$($PKG_CONFIG wayland-client xkbcommon --cflags)
     WAYLAND_LDFLAGS=$($PKG_CONFIG wayland-client xkbcommon --libs)
     WAYLAND_PROTOCOLS_DIR=$($PKG_CONFIG wayland-protocols --variable=pkgdatadir)
