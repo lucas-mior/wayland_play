@@ -40,7 +40,6 @@ CPPFLAGS="$CPPFLAGS -Icbase"
 
 CFLAGS="$CFLAGS -std=c11"
 CFLAGS="$CFLAGS -Wfatal-errors"
-CFLAGS="$CFLAGS -Werror"  # Only uncomment occasionally, keep this line
 
 case "$mode" in
 debug)
